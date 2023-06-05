@@ -1,0 +1,64 @@
+#include <LiquidCrystal_I2C.h> // Library for I2C LCD display
+
+// Pin configuration
+const int sensorPin = A0; // Analog pin connected to the sensor
+const int buzzerPin = 8; // Digital pin for the buzzer
+
+// Initialize LCD display
+LiquidCrystal_I2C lcd(0x27, 16, 2); // Change the address if necessary
+
+void setup() {
+  // Initialize serial communication
+  Serial.begin(9600);
+
+  // Initialize LCD display
+  lcd.begin(16, 2);
+  lcd.backlight();
+
+  // Initialize buzzer
+  pinMode(buzzerPin, OUTPUT);
+}
+
+void loop() {
+  // Read sensor value
+  int sensorValue = analogRead(sensorPin);
+
+  // Convert sensor value to air quality index
+  float airQualityIndex = convertToAQI(sensorValue);
+
+  // Display the result on the serial monitor
+  Serial.print("Sensor Value: ");
+  Serial.print(sensorValue);
+  Serial.print(", Air Quality Index: ");
+  Serial.println(airQualityIndex);
+
+  // Display the result on the LCD
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Air Quality: ");
+  lcd.setCursor(0, 1);
+  lcd.print(airQualityIndex);
+
+  // Check air quality level and trigger alert if necessary
+  if (airQualityIndex > 100) {
+    // Trigger the buzzer
+    digitalWrite(buzzerPin, HIGH);
+  } else {
+    // Turn off the buzzer
+    digitalWrite(buzzerPin, LOW);
+  }
+
+  delay(1000); // Delay between readings
+}
+
+// Function to convert sensor value to air quality index
+float convertToAQI(int sensorValue) {
+  // Perform the necessary calculation based on the sensor and its calibration curve
+  // This will vary depending on the specific air quality sensor being used
+  // Refer to the sensor datasheet or calibration guide for the conversion formula
+  // Example:
+  float voltage = sensorValue * (5.0 / 1023.0);
+  float airQualityIndex = voltage * 100; // Adjust the formula according to your sensor's calibration curve
+
+  return airQualityIndex;
+}
